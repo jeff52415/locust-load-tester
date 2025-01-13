@@ -2,6 +2,11 @@
 
 A load testing suite using Locust to benchmark text embedding models, specifically designed for testing HuggingFace's text-embeddings-inference service. This project helps you understand the performance characteristics of your embedding model deployment under various load conditions.
 
+![Report](assets/image_0.png)
+![Metrics](assets/image_1.png)
+
+
+
 ## Features
 
 - Docker-based setup for both the embedding service and load testing infrastructure

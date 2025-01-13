@@ -38,7 +38,7 @@ services:
       - locust-master
       - embedding-service
     deploy:
-      replicas: 2
+      replicas: 4
     networks:
       - loadtest-network
 

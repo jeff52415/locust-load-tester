@@ -1,7 +1,7 @@
 .PHONY: up down logs scale clean test-single test-info
 
 # Default number of workers to scale to
-WORKERS ?= 2
+WORKERS ?= 4
 HOST_PORT ?= 8080
 CURL_OPTS ?= -s
 
