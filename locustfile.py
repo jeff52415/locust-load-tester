@@ -1,6 +1,7 @@
 import logging
 from locust import HttpUser, task, between, events
 import json
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -18,15 +19,24 @@ def on_test_stop(environment, **kwargs):
     logger.info("Load test is stopping")
 
 class EmbeddingUser(HttpUser):
-    # Use constant pacing for more consistent load
     wait_time = between(3, 5)
     
     def on_start(self):
         """Called when a User starts running"""
         logger.info("User started")
+        # Add Authorization header if token is provided
+        self.headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        # Get token directly from environment variable
+        api_token = os.environ.get('API_TOKEN')
+        if api_token:
+            self.headers["Authorization"] = f"Bearer {api_token}"
+        
         # Test the info endpoint first
         try:
-            with self.client.get("/info", catch_response=True) as response:
+            with self.client.get("/info", headers=self.headers, catch_response=True) as response:
                 if response.status_code == 200:
                     logger.info("Successfully connected to embedding service")
                 else:
@@ -36,10 +46,6 @@ class EmbeddingUser(HttpUser):
     
     @task(1)
     def get_embeddings(self):
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
         payload = {
             "input": [
                 "What is Deep Learning?",
@@ -51,10 +57,10 @@ class EmbeddingUser(HttpUser):
             with self.client.post(
                 "/v1/embeddings",
                 json=payload,
-                headers=headers,
+                headers=self.headers,  # Use the headers from self
                 catch_response=True,
                 name="embedding_request",
-                timeout=30  # Add timeout
+                timeout=30
             ) as response:
                 if response.status_code == 200:
                     try:
