@@ -1,0 +1,10 @@
+[project]
+name = "locust-load-tester"
+version = "0.1.0"
+description = "A load testing suite using Locust to benchmark text embedding models, specifically designed for testing HuggingFace's text-embeddings-inference service"
+authors = [
+    { name = "Jeff Yang" }
+]
+
+[project.urls]
+repository = "https://github.com/jeff52415/locust-load-tester"

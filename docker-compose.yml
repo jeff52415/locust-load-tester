@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  embedding-service:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.6
+    container_name: text-embeddings-server
+    ports:
+      - "8080:80"
+    volumes:
+      - ./data:/data
+    command:
+      - --model-id
+      - "BAAI/bge-m3"
+      - --dtype
+      - float32
+      - --max-concurrent-requests
+      - "256"
+    restart: unless-stopped
+    networks:
+      - loadtest-network
+
+  locust-master:
+    image: locustio/locust
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --master -H http://embedding-service:80
+    networks:
+      - loadtest-network
+
+  locust-worker:
+    image: locustio/locust
+    volumes:
+      - ./:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --worker --master-host locust-master
+    depends_on:
+      - locust-master
+      - embedding-service
+    deploy:
+      replicas: 2
+    networks:
+      - loadtest-network
+
+networks:
+  loadtest-network:
+    driver: bridge 
